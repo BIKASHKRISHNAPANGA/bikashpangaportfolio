@@ -1,0 +1,38 @@
+================================================================================
+BIKASH KRISHNA PANGA — ABOUT ME
+================================================================================
+
+Role:        Web Developer (Full-Stack)
+Specialty:   React.js, Next.js, Node.js, Express.js, WordPress
+Location:    Gopalpur on Sea, Ganjam, Odisha, India
+Status:      Available for Full-Time & Internship Opportunities
+
+SUMMARY:
+Web Developer with hands-on internship experience across React.js, Node.js,
+and WordPress. Built a customizable rich-text editor that cut page load time
+by 76%, and led a student sponsorship initiative that raised ₹4 lakh from
+6 sponsors across 31 schools, engaging 3,000+ students.
+
+EDUCATION:
+- B.Tech in Computer Science and Engineering (2022 - 2026)
+  Gayatri Institute of Engineering and Technology (GIET)
+  Ranked in Top 5% of batch
+
+CURRENT EXPERIENCE:
+- Web Development Intern @ Addensure Media LLP (Delhi, India)
+  Building modern UI components with React.js, developing responsive
+  WordPress sites, custom themes/plugins, and mobile features in React Native.
+
+KEY METRICS & IMPACT:
+- 76% page load time reduction via Tiptap rich-text editor optimization
+- ₹4,00,000 raised across 6 sponsors for inter-school platform
+- 3,000+ students engaged across 31 schools
+- Top 5% academic standing in Computer Science Engineering
+
+CONTACT & LINKS:
+- Email:     developerbikash16@gmail.com
+- Phone:     +91 9348258150
+- Portfolio: https://bikashportfolio.web.app
+- LinkedIn:  https://www.linkedin.com/in/bikash-krishna-panga-254612232/
+- GitHub:    https://github.com/BIKASHKRISHNAPANGA
+================================================================================

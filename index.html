@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bikash Krishna Panga — Interactive Portfolio Terminal</title>
+<meta name="description" content="Web Developer (Full-Stack) — React, Node.js, WordPress. Interactive terminal-style portfolio of Bikash Krishna Panga." />
+<link rel="icon" type="image/svg+xml" href="vite.svg" />
+<style>
+  :root {
+    --bg-1: #111827;
+    --bg-2: #1f2937;
+    --panel: rgba(31, 41, 55, 0.6);
+    --border: #4b5563;
+    --green: #4ade80;
+    --cyan: #22d3ee;
+    --yellow: #facc15;
+    --blue: #60a5fa;
+    --red: #f87171;
+    --purple: #c084fc;
+    --text: #d1d5db;
+    --muted: #9ca3af;
+    --dim: #6b7280;
+  }
+
+  body.theme-matrix {
+    --bg-1: #020b05;
+    --bg-2: #051a0d;
+    --panel: rgba(5, 26, 13, 0.75);
+    --border: #14532d;
+    --green: #00ff66;
+    --cyan: #46f792;
+    --yellow: #a3e635;
+    --blue: #22c55e;
+    --red: #ef4444;
+    --purple: #86efac;
+    --text: #bbf7d0;
+    --muted: #86efac;
+    --dim: #166534;
+  }
+
+  body.theme-cyber {
+    --bg-1: #0a0e1a;
+    --bg-2: #13192f;
+    --panel: rgba(19, 25, 47, 0.75);
+    --border: #ff007f;
+    --green: #00f0ff;
+    --cyan: #ff007f;
+    --yellow: #ffe600;
+    --blue: #7000ff;
+    --red: #ff3366;
+    --purple: #d946ef;
+    --text: #e0f2fe;
+    --muted: #93c5fd;
+    --dim: #475569;
+  }
+
+  body.theme-dracula {
+    --bg-1: #1e1f29;
+    --bg-2: #282a36;
+    --panel: rgba(40, 42, 54, 0.75);
+    --border: #6272a4;
+    --green: #50fa7b;
+    --cyan: #8be9fd;
+    --yellow: #f1fa8c;
+    --blue: #bd93f9;
+    --red: #ff5555;
+    --purple: #ff79c6;
+    --text: #f8f8f2;
+    --muted: #bfbfbf;
+    --dim: #6272a4;
+  }
+
+  body.theme-amber {
+    --bg-1: #120e06;
+    --bg-2: #1f1809;
+    --panel: rgba(31, 24, 9, 0.75);
+    --border: #78350f;
+    --green: #fbbf24;
+    --cyan: #f59e0b;
+    --yellow: #fde68a;
+    --blue: #d97706;
+    --red: #ef4444;
+    --purple: #f59e0b;
+    --text: #fef3c7;
+    --muted: #fcd34d;
+    --dim: #92400e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, var(--bg-1), var(--bg-2), var(--bg-1));
+    color: var(--green);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  a { color: var(--blue); text-decoration: none; word-break: break-all; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  /* Header */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(31, 41, 55, 0.9);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    flex: none;
+    user-select: none;
+  }
+  .dots { display: flex; gap: 8px; align-items: center; }
+  .dot {
+    width: 12px; height: 12px; border-radius: 50%; border: none; padding: 0;
+    cursor: pointer; transition: transform .15s ease, opacity .15s ease;
+  }
+  .dot:hover { transform: scale(1.15); opacity: 0.9; }
+  .dot.r { background: #ef4444; } .dot.y { background: #eab308; }
+  .dot.g { background: #22c55e; animation: glow 3s ease-in-out infinite; }
+  .title { color: #fff; font-weight: 700; font-size: 14px; display: flex; gap: 8px; align-items: center; }
+  .title .busy { color: var(--yellow); font-size: 12px; font-weight: 400; }
+  .clock { color: var(--muted); font-size: 12px; display: flex; gap: 16px; }
+
+  /* Terminal area */
+  #terminal {
+    flex: 1; min-height: 0;
+    overflow-y: auto;
+    padding: 24px;
+  }
+  #terminal::-webkit-scrollbar { width: 8px; }
+  #terminal::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+  #terminal::-webkit-scrollbar-thumb { background: linear-gradient(var(--green), var(--cyan)); border-radius: 4px; }
+
+  .entry { margin-bottom: 24px; }
+  .cmdline { display: flex; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .prompt { color: var(--green); font-weight: 700; flex: none; }
+  .cmdtext { color: #fff; margin-left: 8px; word-break: break-all; }
+  .stamp { color: var(--dim); font-size: 12px; margin-left: auto; padding-left: 8px; flex: none; }
+  .out { margin-top: 8px; color: var(--green); }
+  .out.plain { white-space: pre-wrap; word-break: break-all; }
+
+  /* Input */
+  .inputline { display: flex; align-items: center; margin-bottom: 8px; }
+  #cmd {
+    flex: 1; min-width: 0; margin-left: 8px;
+    background: transparent; border: 0; outline: none;
+    color: #fff; font: inherit;
+  }
+  #cmd::placeholder { color: var(--dim); }
+  .cursor { color: #fff; margin-left: 4px; animation: blink 1s infinite; flex: none; }
+  #suggest {
+    margin-top: 4px; color: var(--muted); font-size: 12px;
+    display: flex; flex-wrap: wrap; gap: 6px 12px;
+  }
+  .s-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px; padding: 3px 8px; cursor: pointer; transition: all .15s ease;
+  }
+  .s-chip:hover {
+    background: rgba(74, 222, 128, 0.15); border-color: var(--green); transform: translateY(-1px);
+  }
+  .s-chip .s-name { color: var(--yellow); font-weight: 700; }
+  .s-chip .s-desc { color: var(--dim); }
+
+  /* Footer */
+  .footbar {
+    flex: none; display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 8px 16px; font-size: 12px; color: var(--muted);
+    background: rgba(31, 41, 55, 0.6);
+    border-top: 1px solid var(--border);
+    user-select: none;
+  }
+  .footbar div { display: flex; gap: 16px; align-items: center; }
+
+  /* Shared content styles */
+  .h-title { color: var(--cyan); font-weight: 700; font-size: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .h-title.sm { font-size: 18px; margin-bottom: 8px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+  .panel.lg { border-radius: 8px; padding: 24px; }
+  .mb { margin-bottom: 16px; }
+  .mt { margin-top: 16px; }
+  .stack > * + * { margin-top: 16px; }
+  .stack-sm > * + * { margin-top: 10px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  .grid.g3 { gap: 12px; }
+  @media (min-width: 768px) {
+    .grid.two { grid-template-columns: 1fr 1fr; }
+    .grid.three { grid-template-columns: repeat(3, 1fr); }
+  }
+  .green { color: var(--green); } .cyan { color: var(--cyan); } .yellow { color: var(--yellow); }
+  .blue { color: var(--blue); } .red { color: var(--red); } .purple { color: var(--purple); } .gray { color: var(--text); }
+  .muted { color: var(--muted); } .dim { color: var(--dim); }
+  .bold { font-weight: 700; }
+  .lg-t { font-size: 18px; } .sm-t { font-size: 13px; } .xs-t { font-size: 12px; }
+  .big { font-size: 24px; font-weight: 700; color: var(--green); }
+  .center { text-align: center; }
+  .between { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  ul.pts { margin: 0; padding-left: 18px; color: var(--text); font-size: 13px; }
+  ul.pts li + li { margin-top: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 4px 8px; border-radius: 4px; font-size: 13px; background: rgba(59,130,246,.2); color: var(--blue); }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 8px; border-radius: 4px; color: var(--green); background: rgba(74,222,128,.15); font-weight: 700; }
+  .notice { background: rgba(59,130,246,.15); border: 1px solid #3b82f6; border-radius: 6px; padding: 14px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 4px;
+    background: rgba(59,130,246,.2); border: 1px solid #3b82f6; color: var(--blue);
+    cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 700;
+    transition: background .2s, transform .15s; text-decoration: none;
+  }
+  .btn:hover { background: rgba(59,130,246,.35); text-decoration: none; transform: translateY(-1px); }
+  .btn.btn-green { background: rgba(74,222,128,.2); border-color: var(--green); color: var(--green); }
+  .btn.btn-green:hover { background: rgba(74,222,128,.35); }
+  .contact-row { display: flex; gap: 12px; align-items: flex-start; }
+  .contact-row .ic { color: var(--yellow); font-size: 20px; }
+  .contact-row .lbl { color: var(--muted); font-size: 13px; }
+  .contact-row > div:last-child { min-width: 0; }
+
+  /* Interactive File System Styles */
+  .file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .file-card {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px 14px; cursor: pointer;
+    transition: all .15s ease; user-select: none;
+  }
+  .file-card:hover {
+    background: rgba(74,222,128,.12); border-color: var(--green);
+    transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.3);
+  }
+  .file-icon { font-size: 20px; flex: none; }
+  .file-details { min-width: 0; flex: 1; }
+  .file-name { font-weight: 700; color: #fff; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-meta { font-size: 11px; color: var(--dim); display: flex; gap: 8px; margin-top: 2px; }
+
+  .cmd-pill {
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
+    background: rgba(74,222,128,.15); color: var(--green);
+    cursor: pointer; font-weight: 700; transition: background .15s;
+  }
+  .cmd-pill:hover { background: rgba(74,222,128,.3); text-decoration: underline; }
+
+  /* Code / Pre styling */
+  pre.file-content {
+    background: rgba(0,0,0,.35); border: 1px solid var(--border); border-radius: 6px;
+    padding: 16px; margin: 12px 0 0 0; overflow-x: auto; color: var(--text);
+    font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+  }
+
+  /* Neofetch */
+  .nf-box { margin-top: 12px; background: rgba(31,41,55,.3); border: 1px solid #374151; border-radius: 8px; padding: 16px; }
+  .nf { color: #fff; max-width: 1280px; margin: 0 auto; }
+  .nf-top { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  .nf-photo, .nf-fallback {
+    width: 96px; height: 96px; border-radius: 50%; background: #334155;
+    object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,.5); flex: none;
+    border: 2px solid var(--cyan);
+  }
+  .nf-fallback { display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: var(--cyan); }
+  .nf-info { flex: 1; width: 100%; display: grid; grid-template-columns: 1fr; column-gap: 40px; row-gap: 4px; }
+  .nf-row { display: flex; }
+  .nf-row .k { color: var(--cyan); font-weight: 700; width: 96px; flex: none; }
+  .nf-row .sep { margin-right: 8px; }
+  .nf-row .v { min-width: 0; overflow-wrap: anywhere; }
+  .nf-row.head .v { color: var(--cyan); font-weight: 700; font-size: 18px; }
+  .nf-row.rule .v { color: var(--cyan); }
+  .nf-colors { margin-top: 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .nf-colors span { width: 24px; height: 16px; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  @media (min-width: 640px) {
+    .nf-photo, .nf-fallback { width: 128px; height: 128px; }
+    .nf-info { grid-template-columns: 1fr 1fr; }
+    .nf-row.head, .nf-row.rule { grid-column: span 2; }
+  }
+  @media (min-width: 768px) { .nf-photo, .nf-fallback { width: 192px; height: 192px; } }
+  @media (min-width: 1024px) {
+    .nf-top { flex-direction: row; align-items: flex-start; }
+    .nf-colors { justify-content: flex-start; }
+  }
+
+  @media (max-width: 640px) {
+    #terminal { padding: 16px; }
+    .clock, .foot-right { display: none; }
+    .file-grid { grid-template-columns: 1fr; }
+  }
+
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(74,222,128,.5); }
+    50% { box-shadow: 0 0 20px rgba(74,222,128,.8); }
+  }
+  @media (prefers-reduced-motion: reduce) { .cursor, .dot.g { animation: none; } }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="dots" aria-label="Terminal controls">
+    <button class="dot r" id="btn-close" title="Reset terminal session" aria-label="Reset terminal"></button>
+    <button class="dot y" id="btn-minimize" title="Clear screen" aria-label="Clear screen"></button>
+    <button class="dot g" id="btn-fullscreen" title="Toggle fullscreen" aria-label="Toggle fullscreen"></button>
+  </div>
+  <div class="title"><span>🖥️ bikash@portfolio: ~</span><span class="busy" id="busy" hidden>Processing...</span></div>
+  <div class="clock"><span>🕒 <span id="clock"></span></span><span>Terminal v2.2</span></div>
+</header>
+
+<main id="terminal" aria-label="Interactive terminal">
+  <div id="history"></div>
+  <div class="inputline">
+    <span class="prompt">bikash@portfolio:~$</span>
+    <input id="cmd" type="text" placeholder="Type 'help' or click any command..." aria-label="Terminal command input" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus />
+    <span class="cursor" aria-hidden="true">_</span>
+  </div>
+  <div id="suggest"></div>
+</main>
+
+<footer class="footbar">
+  <div><span>💻 Portfolio Terminal v2.2</span><span id="cmdcount"></span><span id="themecount" class="dim"></span></div>
+  <div class="foot-right"><span>🔗 All files interactive</span><span>⚡ Instant execution</span></div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------ */
+  /*  Profile data (mirrors the resume PDF)                             */
+  /* ------------------------------------------------------------------ */
+  var PROFILE = {
+    name: "Bikash Krishna Panga",
+    role: "Web Developer (Full-Stack)",
+    email: "developerbikash16@gmail.com",
+    phone: "+91 9348258150",
+    phoneHref: "tel:+919348258150",
+    website: "bikashportfolio.web.app",
+    websiteHref: "https://bikashportfolio.web.app",
+    linkedin: "linkedin.com/in/bikash-krishna-panga",
+    linkedinHref: "https://www.linkedin.com/in/bikash-krishna-panga-254612232/",
+    github: "github.com/BIKASHKRISHNAPANGA",
+    githubHref: "https://github.com/BIKASHKRISHNAPANGA",
+    location: "Gopalpur on Sea, Ganjam, Odisha",
+    photo: "bikash-photo.jpg",
+    resumeHref: "Bikash_Krishna_Panga_Resume_Revised.pdf",
+    summary: "Web Developer with hands-on internship experience across React.js, Node.js, and WordPress. Built a customizable rich-text editor that cut page load time by 76%, and led a student sponsorship initiative that raised ₹4 lakh from 6 sponsors across 31 schools, engaging 3,000+ students."
+  };
+
+  var SKILL_GROUPS = [
+    { title: "Languages", icon: "💬", items: ["JavaScript (ES6+)", "TypeScript", "HTML5", "CSS3"] },
+    { title: "Frontend", icon: "🎨", items: ["React.js", "Next.js", "Tailwind CSS", "Responsive Design"] },
+    { title: "Mobile", icon: "📱", items: ["React Native"] },
+    { title: "Backend", icon: "⚙️", items: ["Node.js", "Express.js", "REST API Development"] },
+    { title: "Libraries", icon: "📚", items: ["Tiptap.js", "Redux Toolkit", "Context API", "Axios"] },
+    { title: "Database / CMS", icon: "🗄️", items: ["MongoDB", "Firebase", "WordPress"] },
+    { title: "Tools & Platforms", icon: "🛠️", items: ["Git", "GitHub", "Vercel", "Netlify", "Postman", "Vite"] },
+    { title: "Core Concepts", icon: "🧠", items: ["Data Structures & Algorithms", "Performance Optimization", "SEO Optimization", "Cross-Browser Compatibility", "Agile Development"] }
+  ];
+
+  /* ------------------------------------------------------------------ */
+  /*  Virtual File System (VFS)                                         */
+  /*  Ensures all files in workspace work instantaneously on demand!    */
+  /* ------------------------------------------------------------------ */
+  var VFS = {
+    "about.txt": {
+      name: "about.txt",
+      icon: "📄",
+      type: "Text Document",
+      size: "1.4 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Bio, summary, education, and career metrics",
+      raw: "Role: Web Developer (Full-Stack)\nLocation: Gopalpur on Sea, Ganjam, Odisha\n\nSummary:\nWeb Developer with hands-on internship experience across React.js, Node.js, and WordPress. Built a customizable rich-text editor that cut page load time by 76%, and led a student sponsorship initiative that raised ₹4 lakh from 6 sponsors across 31 schools, engaging 3,000+ students.",
+      view: function () { return commands.about.output(); }
+    },
+    "skills.txt": {
+      name: "skills.txt",
+      icon: "🎨",
+      type: "Text Document",
+      size: "1.8 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Technical skills inventory across stacks",
+      raw: "Languages: JavaScript (ES6+), TypeScript\nFrontend: React.js, Next.js, Tailwind CSS\nBackend: Node.js, Express.js, REST APIs\nMobile: React Native\nCMS & DB: WordPress, MongoDB, Firebase",
+      view: function () { return commands.skills.output(); }
+    },
+    "experience.log": {
+      name: "experience.log",
+      icon: "📜",
+      type: "System Log",
+      size: "1.6 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Internship roles, dates, and achievements log",
+      raw: "[2026-PRESENT] Web Development Intern @ Addensure Media LLP (Delhi)\n[2025-03-05 to 2025-09-03] Software Developer Intern @ MentorsLand (Assam)",
+      view: function () { return commands.experience.output(); }
+    },
+    "projects.md": {
+      name: "projects.md",
+      icon: "🚀",
+      type: "Markdown",
+      size: "2.1 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Detailed documentation of featured projects",
+      raw: "# Featured Projects\n1. Bikash Agro Export (Live: bikashpanga-agroexports.netlify.app)\n2. IOSF Platform (Live: interschoolosf.in)\n3. Interactive Portfolio Terminal",
+      view: function () { return commands.projects.output(); }
+    },
+    "education.txt": {
+      name: "education.txt",
+      icon: "🎓",
+      type: "Text Document",
+      size: "1.1 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Degree, university, school grades, and coursework",
+      raw: "B.Tech CSE (2022 - 2026) @ Gayatri Institute of Engineering and Technology (Top 5%)\nClass 12: 80% (2022) @ De Paul School\nClass 10: 89% (2020) @ De Paul School",
+      view: function () { return commands.education.output(); }
+    },
+    "achievements.md": {
+      name: "achievements.md",
+      icon: "🏆",
+      type: "Markdown",
+      size: "1.2 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Bootcamp certificates, hackathon rankings, and leadership awards",
+      raw: "# Certifications & Honors\n- Full-Stack Web Development Bootcamp (Dr. Angela Yu)\n- Runner-up, Ganjam Coding Competition\n- Led IOSF Student Sponsorship (₹4L raised, 3,000+ students)",
+      view: function () { return commands.achievements.output(); }
+    },
+    "contact.info": {
+      name: "contact.info",
+      icon: "📫",
+      type: "Config / Contact",
+      size: "0.9 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Email, phone number, LinkedIn, GitHub, and location",
+      raw: "Email: developerbikash16@gmail.com\nPhone: +91 9348258150\nLinkedIn: https://www.linkedin.com/in/bikash-krishna-panga-254612232/\nGitHub: https://github.com/BIKASHKRISHNAPANGA",
+      view: function () { return commands.contact.output(); }
+    },
+    "resume.pdf": {
+      name: "resume.pdf",
+      icon: "📑",
+      type: "PDF Document",
+      size: "568.7 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Official resume PDF of Bikash Krishna Panga",
+      raw: "[Binary PDF Document: 582,352 bytes]",
+      view: function () { return commands.resume.output(); }
+    },
+    "bikash-photo.jpg": {
+      name: "bikash-photo.jpg",
+      icon: "🖼️",
+      type: "JPEG Image",
+      size: "19.0 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Profile portrait of Bikash Krishna Panga",
+      raw: "[Binary JPEG Image: 19,436 bytes]",
+      view: function () {
+        return '<div><div class="h-title sm">🖼️ Profile Photo — bikash-photo.jpg</div>' +
+          panel(
+            '<div class="center" style="padding:16px 0">' +
+            '<img src="' + PROFILE.photo + '" alt="' + PROFILE.name + '" style="width:160px;height:160px;border-radius:50%;object-fit:cover;border:3px solid var(--cyan);box-shadow:0 4px 16px rgba(0,0,0,.5);margin-bottom:16px" data-nf-photo />' +
+            '<div class="green bold lg-t">' + PROFILE.name + '</div>' +
+            '<div class="yellow sm-t mb">' + PROFILE.role + '</div>' +
+            '<div class="muted sm-t mb">File size: 19.4 KB • Format: JPEG • Dimensions: 500x500</div>' +
+            '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">' +
+            '<a class="btn btn-green" href="' + PROFILE.photo + '" target="_blank" rel="noopener noreferrer">👁️ View Full Size</a>' +
+            '<a class="btn" href="' + PROFILE.photo + '" download="bikash-photo.jpg">📥 Download Photo</a>' +
+            '</div></div>'
+          ) + '</div>';
+      }
+    },
+    "vite.svg": {
+      name: "vite.svg",
+      icon: "⚡",
+      type: "SVG Vector",
+      size: "175.0 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Vector icon graphic asset",
+      raw: "[SVG Vector Graphic: 179,217 bytes]",
+      view: function () {
+        return '<div><div class="h-title sm">⚡ Vector Graphic — vite.svg</div>' +
+          panel(
+            '<div class="center" style="padding:16px 0">' +
+            '<img src="vite.svg" alt="Vector Graphic" style="width:120px;height:120px;margin-bottom:16px;filter:drop-shadow(0 4px 12px rgba(34,211,238,.4))" />' +
+            '<div class="cyan bold lg-t">Vector Asset (SVG)</div>' +
+            '<div class="muted sm-t mb">File size: 175.0 KB • Format: XML Scalable Vector Graphic</div>' +
+            '<a class="btn" href="vite.svg" target="_blank" rel="noopener noreferrer">👁️ Open SVG Asset</a>' +
+            '</div>'
+          ) + '</div>';
+      }
+    },
+    "package.json": {
+      name: "package.json",
+      icon: "📦",
+      type: "JSON Configuration",
+      size: "0.4 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Node.js project manifest & scripts",
+      raw: '{\n  "name": "bikash-portfolio-terminal",\n  "version": "2.1.0",\n  "description": "Interactive UNIX Terminal Portfolio",\n  "main": "index.html",\n  "scripts": {\n    "start": "npx serve .",\n    "dev": "npx serve ."\n  },\n  "author": "Bikash Krishna Panga",\n  "license": "MIT"\n}',
+      view: function () {
+        return '<div><div class="h-title sm">📦 package.json</div>' +
+          panel(
+            '<div class="between sm-t mb"><span class="cyan bold">bikash-portfolio-terminal@2.1.0</span><span class="badge">Node.js</span></div>' +
+            '<pre class="file-content" style="margin:0"><code class="green">' +
+            esc(VFS["package.json"].raw) +
+            '</code></pre>' +
+            '<div class="mt"><button class="btn btn-green" onclick="copyToClipboard(VFS[\'package.json\'].raw, this)">📋 Copy JSON</button></div>'
+          ) + '</div>';
+      }
+    },
+    "README.md": {
+      name: "README.md",
+      icon: "📖",
+      type: "Markdown Document",
+      size: "2.3 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Portfolio documentation, command references, and setup guide",
+      raw: "# Bikash Krishna Panga — Interactive Terminal Portfolio\n\nFeatures:\n- Interactive UNIX terminal experience\n- Full file system support (cat, ls, open, tree)\n- Quick navigation & rich profile cards\n- Theme switcher & custom easter eggs",
+      view: function () {
+        return '<div><div class="h-title sm">📖 README.md</div>' +
+          panel(
+            '<div class="cyan bold lg-t mb">🖥️ Bikash Krishna Panga — Interactive Terminal Portfolio</div>' +
+            '<div class="gray mb">An interactive, high-performance UNIX-like terminal portfolio for Bikash Krishna Panga, Full-Stack Web Developer.</div>' +
+            '<div class="yellow bold sm-t mb">✨ Key Highlights:</div>' +
+            list([
+              "UNIX Terminal Shell: help, ls, cat, open, clear, date, whoami, pwd, tree, theme",
+              "Interactive File System: every file listed in 'ls' is clickable and viewable",
+              "Rich Neofetch system specs with profile portrait & graceful fallback",
+              "One-click resume download and direct in-browser PDF preview",
+              "Zero external runtime dependencies: lightning fast, accessible, responsive"
+            ]) +
+            '<div class="mt"><span class="muted sm-t">Type <span class="cmd-pill" onclick="runCmd(\'cat about.txt\')">cat about.txt</span> or <span class="cmd-pill" onclick="runCmd(\'resume\')">resume</span> to learn more.</span></div>'
+          ) + '</div>';
+      }
+    },
+    "index.html": {
+      name: "index.html",
+      icon: "💻",
+      type: "HTML5 Application",
+      size: "35.0 KB",
+      perms: "-rw-r--r--",
+      date: "Oct 16 18:44",
+      desc: "Main portfolio single-page terminal application",
+      raw: "<!DOCTYPE html><html>...Interactive Terminal Application...</html>",
+      view: function () {
+        return '<div><div class="h-title sm">💻 index.html — Source Overview</div>' +
+          panel(
+            '<div class="green bold mb">Bikash Krishna Panga — Interactive Portfolio Terminal v2.2</div>' +
+            '<div class="gray sm-t mb">Single-page web application written in standard semantic HTML5, modern CSS3, and vanilla ES6+ JavaScript.</div>' +
+            list([
+              "Virtual File System (VFS) with instant on-demand file rendering",
+              "POSIX-compliant CLI command parser with argument support",
+              "Interactive file explorer with clickable file tiles",
+              "Dynamic theme engine (Matrix, Cyberpunk, Dracula, Amber, Default)",
+              "Mobile-responsive layout with cross-browser compatibility"
+            ]) +
+            '<div class="mt"><span class="muted sm-t">Type <span class="cmd-pill" onclick="runCmd(\'ls\')">ls</span> to explore all files.</span></div>'
+          ) + '</div>';
+      }
+    }
+  };
+
+  // Alias for original revised resume filename
+  VFS["Bikash_Krishna_Panga_Resume_Revised.pdf"] = VFS["resume.pdf"];
+
+  /* ------------------------------------------------------------------ */
+  /*  HTML builders                                                     */
+  /* ------------------------------------------------------------------ */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function list(points) {
+    return '<ul class="pts">' + points.map(function (p) { return "<li>" + p + "</li>"; }).join("") + "</ul>";
+  }
+  function panel(inner, cls) { return '<div class="panel ' + (cls || "") + '">' + inner + "</div>"; }
+
+  function projectCard(p) {
+    return '<div class="panel">' +
+      '<div class="between" style="margin-bottom:4px"><div class="cyan bold">' + p.title + '</div>' +
+      (p.status ? '<span class="badge">' + p.status + "</span>" : "") + "</div>" +
+      '<div class="muted xs-t" style="margin-bottom:8px">' + p.period + "</div>" +
+      '<div class="yellow sm-t" style="margin-bottom:8px">' + p.tech + "</div>" +
+      list(p.points) +
+      (p.link ? '<a class="sm-t" style="display:inline-block;margin-top:12px" href="https://' + p.link + '" target="_blank" rel="noopener noreferrer">🔗 ' + p.link + "</a>" : "") +
+      "</div>";
+  }
+
+  function experienceCard(e) {
+    return panel(
+      '<div class="between" style="margin-bottom:12px"><div>' +
+      '<div class="green bold lg-t">' + e.role + "</div>" +
+      '<div class="yellow">' + e.company + ' <span class="muted">• ' + e.place + "</span></div></div>" +
+      '<div style="text-align:right"><div class="muted sm-t">' + e.period + "</div>" +
+      (e.current ? '<span class="badge">Current</span>' : "") + "</div></div>" +
+      list(e.points)
+    );
+  }
+
+  function contactRow(icon, label, value, href, external, tone) {
+    var inner = href
+      ? '<a href="' + href + '"' + (external ? ' target="_blank" rel="noopener noreferrer"' : "") +
+        ' class="' + (tone || "green") + '">' + value + "</a>"
+      : '<div class="' + (tone || "green") + '">' + value + "</div>";
+    return '<div class="contact-row"><span class="ic">' + icon + '</span><div><div class="lbl">' + label + "</div>" + inner + "</div></div>";
+  }
+
+  function neofetch() {
+    var info = [
+      ["", "bikash@portfolio", "head"],
+      ["", "-------------------", "rule"],
+      ["OS", "Developer Portfolio LTS 26.04"],
+      ["Host", PROFILE.role],
+      ["Role", "Web Development Intern @ Addensure Media"],
+      ["Kernel", "React-Next.js-Node-6.0.0"],
+      ["Uptime", "Building since 2022 (B.Tech CSE)"],
+      ["Packages", "React, Next.js, Express, Tiptap, Redux"],
+      ["Shell", "TypeScript /w Tailwind CSS"],
+      ["CMS", "WordPress themes & plugins"],
+      ["Mobile", "React Native"],
+      ["DB", "MongoDB • Firebase"],
+      ["Deploy", "Vercel • Netlify"],
+      ["Impact", "76% faster page load (Tiptap editor)"],
+      ["Events", "₹4 lakh raised • 31 schools • 3,000+ students"],
+      ["Rank", "Top 5% of batch"],
+      ["Award", "Runner-up, Ganjam Coding Competition"],
+      ["Web", PROFILE.website]
+    ];
+    var rows = info.map(function (r) {
+      var cls = r[2] ? " " + r[2] : "";
+      return '<div class="nf-row' + cls + '">' +
+        (r[0] ? '<span class="k">' + r[0] + '</span><span class="sep">:</span>' : "") +
+        '<span class="v">' + esc(r[1]) + "</span></div>";
+    }).join("");
+    var colors = ["#1f2937", "#ef4444", "#22c55e", "#eab308", "#3b82f6", "#a855f7", "#06b6d4", "#ffffff"];
+    var swatches = colors.map(function (c) { return '<span style="background:' + c + '"></span>'; }).join("");
+    return '<div class="nf-box"><div class="nf"><div class="nf-top">' +
+      '<img class="nf-photo" src="' + PROFILE.photo + '" alt="' + PROFILE.name + '" data-nf-photo />' +
+      '<div class="nf-info">' + rows + "</div></div>" +
+      '<div class="nf-colors">' + swatches + "</div></div></div>";
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Themes                                                            */
+  /* ------------------------------------------------------------------ */
+  var THEMES = ["default", "matrix", "cyber", "dracula", "amber"];
+  var currentThemeIndex = 0;
+
+  function setTheme(name) {
+    name = (name || "").toLowerCase().trim();
+    THEMES.forEach(function (t) { document.body.classList.remove("theme-" + t); });
+    if (name && name !== "default" && THEMES.indexOf(name) !== -1) {
+      document.body.classList.add("theme-" + name);
+      currentThemeIndex = THEMES.indexOf(name);
+    } else {
+      currentThemeIndex = 0;
+      name = "default";
+    }
+    var themeLbl = document.getElementById("themecount");
+    if (themeLbl) themeLbl.textContent = "🎨 Theme: " + name;
+    return name;
+  }
+
+  function cycleTheme() {
+    currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
+    return setTheme(THEMES[currentThemeIndex]);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Commands                                                          */
+  /* ------------------------------------------------------------------ */
+  var commands = {
+    help: {
+      description: "Show all available commands",
+      output: function () {
+        function item(n, d) {
+          return '<div><span class="cmd-pill" onclick="runCmd(\'' + n + '\')">' + n + '</span> <span class="muted">-</span> <span class="gray">' + d + '</span></div>';
+        }
+        return '<div><div class="cyan bold lg-t mb">📋 Available Commands &amp; Shortcuts</div>' +
+          '<div class="grid two">' +
+          '<div><div class="yellow bold" style="margin-bottom:8px">🔧 System &amp; Shell Commands</div><div class="sm-t stack-sm">' +
+          item("help", "Show this help guide") +
+          item("neofetch", "Display system specs & profile") +
+          item("ls", "Explore all files (clickable)") +
+          item("tree", "Visual directory tree") +
+          item("clear", "Clear terminal screen") +
+          item("date", "Show current date & time") +
+          item("whoami", "Display current user identity") +
+          item("pwd", "Print working directory") +
+          item("theme", "Switch color theme") +
+          item("history", "View command history") +
+          item("stats", "Show session statistics") +
+          "</div></div>" +
+          '<div><div class="yellow bold" style="margin-bottom:8px">👤 Profile &amp; File Commands</div><div class="sm-t stack-sm">' +
+          item("about", "Learn about Bikash") +
+          item("skills", "Browse technical expertise") +
+          item("experience", "Work experience & roles") +
+          item("projects", "View featured projects") +
+          item("education", "Education & academic rank") +
+          item("achievements", "Certifications & awards") +
+          item("contact", "Get all contact channels") +
+          item("resume", "Download or view resume PDF") +
+          item("photo", "View profile photo") +
+          item("social", "Open social media links") +
+          "</div></div></div>" +
+          panel(
+            '<div class="yellow bold sm-t mb">💡 Pro Tips &amp; Interactive Features:</div>' +
+            '<div class="sm-t stack-sm text-dim">' +
+            '<div>• <strong>Click any file or command</strong> in the terminal to execute it instantly!</div>' +
+            '<div>• <strong>File Commands:</strong> Type <span class="green">cat &lt;file&gt;</span>, <span class="green">open &lt;file&gt;</span>, or directly type <span class="green">resume.pdf</span>, <span class="green">about.txt</span>, etc.</div>' +
+            '<div>• <strong>Navigation:</strong> Use <span class="yellow">↑ / ↓</span> arrows for command history, <span class="yellow">Tab</span> for autocomplete, <span class="yellow">Ctrl+L</span> to clear.</div></div>',
+            "mt"
+          ) + '</div>';
+      }
+    },
+    neofetch: { description: "Display system information", output: neofetch },
+    about: {
+      description: "Learn about Bikash",
+      output: function () {
+        return '<div><div class="h-title">🚀 About Me</div>' +
+          panel('<div class="green bold" style="margin-bottom:8px">' + PROFILE.role + "</div>" +
+            '<div class="gray" style="margin-bottom:16px">' + PROFILE.summary + "</div>" +
+            '<div class="grid two sm-t">' +
+            '<div><div class="yellow bold">📍 Location</div><div class="gray">' + PROFILE.location + "</div></div>" +
+            '<div><div class="yellow bold">🎓 Education</div><div class="gray">B.Tech, Computer Science Engineering (2022 – 2026)</div><div class="muted xs-t">Gayatri Institute of Engineering and Technology • Top 5% of batch</div></div>' +
+            '<div><div class="yellow bold">💼 Current Role</div><div class="gray">Web Development Intern @ Addensure Media LLP</div></div>' +
+            '<div><div class="yellow bold">🎯 Status</div><div class="green">Available for Opportunities</div></div></div>', "mb") +
+          '<div class="grid three g3 mb center">' +
+          panel('<div class="big">76%</div><div class="muted xs-t">page load time reduction</div>') +
+          panel('<div class="big">₹4 lakh</div><div class="muted xs-t">raised from 6 sponsors</div>') +
+          panel('<div class="big">3,000+</div><div class="muted xs-t">students across 31 schools</div>') + "</div>" +
+          '<div class="muted sm-t">💡 Type <span class="cmd-pill" onclick="runCmd(\'skills\')">skills</span> to see technical expertise, or <span class="cmd-pill" onclick="runCmd(\'resume\')">resume</span> to download CV.</div></div>';
+      }
+    },
+    skills: {
+      description: "View technical skills",
+      output: function () {
+        var groups = SKILL_GROUPS.map(function (g) {
+          return panel('<div class="yellow bold" style="margin-bottom:12px">' + g.icon + " " + g.title + "</div>" +
+            '<div class="chips">' + g.items.map(function (i) { return '<span class="chip">' + esc(i) + "</span>"; }).join("") + "</div>");
+        }).join("");
+        return '<div><div class="h-title">⚡ Technical Skills</div><div class="grid two">' + groups + "</div>" +
+          panel('<div class="yellow bold" style="margin-bottom:8px">🤖 AI-Assisted Development</div><div class="gray sm-t">Prompt engineering with Claude, ChatGPT, Gemini, and GitHub Copilot for rapid development, code generation, and debugging.</div>', "mt") +
+          '<div class="muted sm-t mt">🏆 Type <span class="cmd-pill" onclick="runCmd(\'achievements\')">achievements</span> for certifications and awards.</div></div>';
+      }
+    },
+    experience: {
+      description: "See work experience",
+      output: function () {
+        return '<div><div class="h-title">💼 Work Experience</div><div class="stack">' +
+          experienceCard({
+            role: "Web Development Intern", company: "Addensure Media LLP", place: "Delhi, India",
+            period: "March 2026 – Present", current: true,
+            points: [
+              "Designing and implementing modern UI components using React.js for seamless user interaction",
+              "Developing and maintaining multiple responsive WordPress websites, improving user experience and site performance",
+              "Building and customizing themes and plugins to meet client requirements",
+              "Leveraging React Native to develop and optimize mobile application features"
+            ]
+          }) +
+          experienceCard({
+            role: "Software Developer Intern", company: "MentorsLand", place: "Assam, India",
+            period: "Mar 5, 2025 – Sep 3, 2025",
+            points: [
+              "Engineered a customizable rich-text editor using Tiptap.js, enhancing content management capabilities",
+              "Optimized frontend performance, achieving a 76% reduction in page load time",
+              "Designed and implemented an interactive dashboard with efficient state management and REST API integration"
+            ]
+          }) + "</div>" +
+          '<div class="muted sm-t mt">💡 Type <span class="cmd-pill" onclick="runCmd(\'projects\')">projects</span> to see what I\'ve built.</div></div>';
+      }
+    },
+    projects: {
+      description: "Browse featured projects",
+      output: function () {
+        return '<div><div class="h-title">🚀 Featured Projects</div><div class="stack">' +
+          projectCard({
+            title: "Bikash Agro Export", status: "Live",
+            tech: "JavaScript • Intersection Observer API • Responsive Design",
+            period: "December 2025 – January 2026 • Personal Project",
+            link: "bikashpanga-agroexports.netlify.app",
+            points: [
+              "Fully responsive agricultural export website with dynamic scroll animations",
+              "Conversion-focused, mobile-first interface with smooth scrolling navigation",
+              "Direct communication features (click-to-call, email, WhatsApp) for lead generation",
+              "Optimized DOM handling for faster load times"
+            ]
+          }) +
+          projectCard({
+            title: "IOSF — Inter-School Event Platform", status: "Live",
+            tech: "HTML • CSS • JavaScript • React • Tailwind CSS • REST APIs",
+            period: "September 5, 2025 – December 2, 2025",
+            link: "interschoolosf.in",
+            points: [
+              "Built and maintained the website with REST APIs for dynamic content rendering",
+              "Coordinated event operations engaging 31 schools and 3,000+ student participants",
+              "Secured 6 sponsors, raising ₹4 lakh in event funding",
+              "Improved performance and usability to support peak registration traffic"
+            ]
+          }) +
+          projectCard({
+            title: "Interactive Portfolio Terminal", status: "Active",
+            tech: "HTML5 • Modern CSS3 • JavaScript (ES6+) • Web APIs",
+            period: "2026 • Developer Showcase",
+            link: "bikashportfolio.web.app",
+            points: [
+              "Interactive Unix-like terminal portfolio with zero runtime dependencies",
+              "Integrated Virtual File System (VFS) with instant clickable execution",
+              "Dynamic theme engine, command history, and responsive mobile interface"
+            ]
+          }) + "</div>" +
+          '<div class="muted sm-t mt">🔗 Visit my GitHub for more source code: <a href="' + PROFILE.githubHref + '" target="_blank" rel="noopener noreferrer">' + PROFILE.github + "</a></div></div>";
+      }
+    },
+    education: {
+      description: "View education background",
+      output: function () {
+        return '<div><div class="h-title">🎓 Education</div><div class="stack">' +
+          panel('<div class="between" style="margin-bottom:8px"><div><div class="green bold lg-t">B.Tech, Computer Science Engineering</div><div class="yellow">Gayatri Institute of Engineering and Technology</div></div><div class="muted sm-t">2022 – 2026</div></div>' +
+            list(["Ranked among top 5% of batch", "Relevant coursework: Web Development, AI Prompting, Data Structures & Algorithms, DBMS"])) +
+          panel('<div class="green bold lg-t">De Paul School</div><div class="yellow" style="margin-bottom:8px">Brahmapur, India</div>' +
+            list(["Class 12: 80% (2022)", "Class 10: 89% (2020)"])) +
+          "</div></div>";
+      }
+    },
+    achievements: {
+      description: "Certifications & achievements",
+      output: function () {
+        function a(t, s) { return panel('<div class="green bold">' + t + '</div><div class="muted sm-t">' + s + "</div>"); }
+        return '<div><div class="h-title">🏆 Certifications &amp; Achievements</div><div class="stack-sm">' +
+          a("The Complete Full-Stack Web Development Bootcamp", "Dr. Angela Yu • January 2025") +
+          a("Runner-up, Ganjam Coding Competition", "Problem-Solving &amp; Algorithms") +
+          a("Led student sponsorship initiative (IOSF)", "₹4 lakh raised • 6 sponsors • 31 schools • 3,000+ students") +
+          a("Academic Excellence (Top 5%)", "B.Tech Computer Science Engineering batch (2022 - 2026)") +
+          "</div></div>";
+      }
+    },
+    contact: {
+      description: "Get contact information",
+      output: function () {
+        return '<div><div class="h-title">📫 Let\'s Connect!</div>' +
+          panel('<div class="grid two" style="gap:24px"><div class="stack">' +
+            contactRow("📧", "Email", PROFILE.email, "mailto:" + PROFILE.email, false, "green") +
+            contactRow("📱", "Phone", PROFILE.phone, PROFILE.phoneHref, false, "green") +
+            contactRow("🌐", "Portfolio", PROFILE.website, PROFILE.websiteHref, true, "blue") +
+            '</div><div class="stack">' +
+            contactRow("💼", "LinkedIn", PROFILE.linkedin, PROFILE.linkedinHref, true, "blue") +
+            contactRow("👨🏻‍💻", "GitHub", PROFILE.github, PROFILE.githubHref, true, "blue") +
+            contactRow("📍", "Location", PROFILE.location, "", false, "green") +
+            "</div></div>", "lg") +
+          '<div class="center" style="margin-top:24px"><div class="gray" style="font-size:16px;margin-bottom:8px">Ready to collaborate on exciting projects! 🚀</div>' +
+          '<div class="muted sm-t">Feel free to reach out for opportunities or just to say hi! 👋</div></div></div>';
+      }
+    },
+    resume: {
+      description: "Download or view resume PDF",
+      output: function () {
+        return '<div><div class="cyan bold lg-t" style="margin-bottom:8px">📄 Resume of Bikash Krishna Panga</div>' +
+          panel(
+            '<div class="between sm-t mb"><div><span class="green bold">Bikash_Krishna_Panga_Resume_Revised.pdf</span> <span class="muted sm-t">(582 KB)</span></div><span class="badge">Verified PDF</span></div>' +
+            '<div class="gray mb sm-t">Full-Stack Web Developer — React.js, Node.js, WordPress. Covers complete experience, projects, leadership, and education.</div>' +
+            '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">' +
+            '<a class="btn btn-green" href="' + PROFILE.resumeHref + '" download="Bikash_Krishna_Panga_Resume.pdf">📥 Download Resume (PDF)</a>' +
+            '<a class="btn" href="' + PROFILE.resumeHref + '" target="_blank" rel="noopener noreferrer">👁️ View / Open in Browser</a>' +
+            '</div>' +
+            '<div class="notice sm-t">' +
+            '<div class="yellow bold" style="margin-bottom:4px">⚡ Key Resume Highlights:</div>' +
+            '<div>• Web Developer Intern @ Addensure Media LLP &amp; MentorsLand</div>' +
+            '<div>• 76% frontend page load time reduction via Tiptap.js optimization</div>' +
+            '<div>• ₹4,00,000 funding raised across 6 sponsors for 31 schools</div>' +
+            '<div>• Top 5% academic standing in B.Tech Computer Science Engineering</div>' +
+            '</div>'
+          ) + '</div>';
+      }
+    },
+    photo: {
+      description: "View profile photo",
+      output: function () { return VFS["bikash-photo.jpg"].view(); }
+    },
+    ls: {
+      description: "List files and sections (interactive)",
+      output: function (args) {
+        var isLong = args && (args.indexOf("-l") !== -1 || args.indexOf("-la") !== -1 || args.indexOf("-al") !== -1);
+        var fileKeys = Object.keys(VFS).filter(function (k) { return k !== "Bikash_Krishna_Panga_Resume_Revised.pdf"; });
+
+        if (isLong) {
+          var rows = fileKeys.map(function (k) {
+            var f = VFS[k];
+            return '<div><span class="muted">' + f.perms + '</span>  <span class="dim">1 bikash staff</span>  <span class="yellow" style="display:inline-block;width:70px;text-align:right">' + f.size + '</span>  <span class="muted">' + f.date + '</span>  <span class="cmd-pill" onclick="runCmd(\'cat ' + k + '\')">' + f.icon + ' ' + k + '</span></div>';
+          }).join("");
+          return '<div><div class="cyan bold sm-t mb">total ' + fileKeys.length + ' files</div>' +
+            '<pre class="file-content" style="margin:0 0 12px 0">' + rows + '</pre>' +
+            '<div class="muted sm-t">💡 Click any file name above to view it.</div></div>';
+        }
+
+        var tiles = fileKeys.map(function (k) {
+          var f = VFS[k];
+          return '<div class="file-card" onclick="runCmd(\'cat ' + k + '\')" title="Click to view ' + k + '">' +
+            '<span class="file-icon">' + f.icon + '</span>' +
+            '<div class="file-details">' +
+            '<div class="file-name">' + k + '</div>' +
+            '<div class="file-meta"><span>' + f.size + '</span><span>•</span><span>' + f.type + '</span></div>' +
+            '</div></div>';
+        }).join("");
+
+        return '<div><div class="between mb"><div class="cyan bold lg-t">📂 Project Files (' + fileKeys.length + ')</div><span class="muted sm-t">Type \'ls -l\' for detailed list</span></div>' +
+          '<div class="file-grid">' + tiles + '</div>' +
+          '<div class="muted sm-t">💡 <strong>Interactive:</strong> Click any file card above, or type <span class="green">cat &lt;filename&gt;</span> to inspect.</div></div>';
+      }
+    },
+    cat: {
+      description: "View file contents (e.g. cat resume.pdf)",
+      output: function (filename) {
+        if (!filename) {
+          return '<div><div class="yellow bold mb">Usage: cat &lt;filename&gt;</div>' +
+            '<div class="gray sm-t mb">Available files in workspace:</div>' +
+            '<div class="chips">' +
+            Object.keys(VFS).filter(function (k) { return k !== "Bikash_Krishna_Panga_Resume_Revised.pdf"; }).map(function (k) {
+              return '<span class="cmd-pill" onclick="runCmd(\'cat ' + k + '\')">' + k + '</span>';
+            }).join(" ") +
+            '</div></div>';
+        }
+        filename = filename.trim().replace(/^\.\//, "");
+        var f = VFS[filename];
+        if (!f) {
+          return '<div class="red">cat: ' + esc(filename) + ': No such file or directory.<br><span class="muted sm-t">Type <span class="green">\'ls\'</span> to see all available files.</span></div>';
+        }
+        return f.view();
+      }
+    },
+    open: {
+      description: "Open file, link, or channel in browser",
+      output: function (target) {
+        if (!target) {
+          return '<div class="yellow">Usage: open &lt;filename | resume | github | linkedin | email | website&gt;</div>';
+        }
+        target = target.trim().toLowerCase().replace(/^\.\//, "");
+        if (target === "resume" || target === "resume.pdf" || target === "bikash_krishna_panga_resume_revised.pdf") {
+          window.open(PROFILE.resumeHref, "_blank");
+          return '<div class="green">✓ Opening resume PDF in a new tab... <a href="' + PROFILE.resumeHref + '" target="_blank">Click here if not redirected</a></div>';
+        } else if (target === "github" || target === "git") {
+          window.open(PROFILE.githubHref, "_blank");
+          return '<div class="green">✓ Opening GitHub profile... <a href="' + PROFILE.githubHref + '" target="_blank">' + PROFILE.github + '</a></div>';
+        } else if (target === "linkedin") {
+          window.open(PROFILE.linkedinHref, "_blank");
+          return '<div class="green">✓ Opening LinkedIn profile... <a href="' + PROFILE.linkedinHref + '" target="_blank">' + PROFILE.linkedin + '</a></div>';
+        } else if (target === "website" || target === "portfolio" || target === "site") {
+          window.open(PROFILE.websiteHref, "_blank");
+          return '<div class="green">✓ Opening website... <a href="' + PROFILE.websiteHref + '" target="_blank">' + PROFILE.website + '</a></div>';
+        } else if (target === "email" || target === "mail") {
+          window.location.href = "mailto:" + PROFILE.email;
+          return '<div class="green">✓ Opening mail client to ' + PROFILE.email + '</div>';
+        } else if (target === "photo" || target === "bikash-photo.jpg") {
+          window.open(PROFILE.photo, "_blank");
+          return '<div class="green">✓ Opening profile photo...</div>';
+        } else if (target.indexOf("http://") === 0 || target.indexOf("https://") === 0) {
+          window.open(target, "_blank");
+          return '<div class="green">✓ Opening ' + esc(target) + ' in a new tab...</div>';
+        } else if (VFS[target]) {
+          return VFS[target].view();
+        }
+        return '<div class="red">open: Cannot open \'' + esc(target) + '\'. Type <span class="green">\'ls\'</span> or <span class="green">\'help\'</span>.</div>';
+      }
+    },
+    tree: {
+      description: "Visual directory tree structure",
+      output: function () {
+        var lines = [
+          '<span class="cyan bold">. (portfolio-workspace)</span>',
+          '├── 📄 <span class="cmd-pill" onclick="runCmd(\'cat about.txt\')">about.txt</span>',
+          '├── 🎨 <span class="cmd-pill" onclick="runCmd(\'cat skills.txt\')">skills.txt</span>',
+          '├── 📜 <span class="cmd-pill" onclick="runCmd(\'cat experience.log\')">experience.log</span>',
+          '├── 🚀 <span class="cmd-pill" onclick="runCmd(\'cat projects.md\')">projects.md</span>',
+          '├── 🎓 <span class="cmd-pill" onclick="runCmd(\'cat education.txt\')">education.txt</span>',
+          '├── 🏆 <span class="cmd-pill" onclick="runCmd(\'cat achievements.md\')">achievements.md</span>',
+          '├── 📫 <span class="cmd-pill" onclick="runCmd(\'cat contact.info\')">contact.info</span>',
+          '├── 📑 <span class="cmd-pill" onclick="runCmd(\'cat resume.pdf\')">resume.pdf</span> <span class="muted">-> Bikash_Krishna_Panga_Resume_Revised.pdf</span>',
+          '├── 🖼️ <span class="cmd-pill" onclick="runCmd(\'cat bikash-photo.jpg\')">bikash-photo.jpg</span>',
+          '├── ⚡ <span class="cmd-pill" onclick="runCmd(\'cat vite.svg\')">vite.svg</span>',
+          '├── 📦 <span class="cmd-pill" onclick="runCmd(\'cat package.json\')">package.json</span>',
+          '├── 📖 <span class="cmd-pill" onclick="runCmd(\'cat README.md\')">README.md</span>',
+          '└── 💻 <span class="cmd-pill" onclick="runCmd(\'cat index.html\')">index.html</span>',
+          '<br><span class="muted sm-t">13 files, 0 directories. Click any file to view.</span>'
+        ];
+        return '<div><div class="h-title sm">🌳 Directory Tree</div><pre class="file-content" style="margin:0">' + lines.join("\n") + '</pre></div>';
+      }
+    },
+    theme: {
+      description: "Change terminal theme (matrix, cyber, dracula, amber, default)",
+      output: function (themeName) {
+        if (!themeName) {
+          var nextTheme = cycleTheme();
+          return '<div class="green">🎨 Theme changed to: <span class="yellow bold">' + nextTheme + '</span><br><span class="muted sm-t">Available themes: ' + THEMES.join(", ") + ' (type "theme &lt;name&gt;" to pick)</span></div>';
+        }
+        var res = setTheme(themeName);
+        return '<div class="green">🎨 Theme set to: <span class="yellow bold">' + res + '</span></div>';
+      }
+    },
+    history: {
+      description: "Show command history",
+      output: function () {
+        if (!commandHistory.length) return '<div class="muted">No commands in history yet.</div>';
+        var rows = commandHistory.map(function (c, idx) {
+          return '<div><span class="muted">' + (idx + 1) + '</span>  <span class="cmd-pill" onclick="runCmd(\'' + esc(c) + '\')">' + esc(c) + '</span></div>';
+        }).join("");
+        return '<div><div class="cyan bold sm-t mb">📜 Command History</div>' +
+          '<pre class="file-content" style="margin:0 0 12px 0">' + rows + '</pre>' +
+          '<div class="muted sm-t">💡 Click any command to re-run it.</div></div>';
+      }
+    },
+    stats: {
+      description: "Show terminal session statistics",
+      output: function () {
+        var elapsedSec = Math.floor((Date.now() - sessionStart) / 1000);
+        var min = Math.floor(elapsedSec / 60);
+        var sec = elapsedSec % 60;
+        return '<div><div class="h-title sm">📊 Terminal Session Statistics</div>' +
+          panel(
+            '<div class="grid two sm-t">' +
+            '<div><span class="yellow bold">Session Duration:</span> <span class="green">' + min + 'm ' + sec + 's</span></div>' +
+            '<div><span class="yellow bold">Commands Executed:</span> <span class="green">' + commandHistory.length + '</span></div>' +
+            '<div><span class="yellow bold">Files in VFS:</span> <span class="green">' + Object.keys(VFS).length + ' files</span></div>' +
+            '<div><span class="yellow bold">Current Theme:</span> <span class="green">' + THEMES[currentThemeIndex] + '</span></div>' +
+            '<div><span class="yellow bold">Host OS:</span> <span class="green">Developer Portfolio LTS 26.04</span></div>' +
+            '<div><span class="yellow bold">Status:</span> <span class="green">Interactive &amp; Healthy ✓</span></div>' +
+            '</div>'
+          ) + '</div>';
+      }
+    },
+    social: {
+      description: "Show all social media channels",
+      output: function () {
+        return '<div><div class="h-title sm">🌐 Social Channels &amp; Links</div>' +
+          panel(
+            '<div class="stack-sm sm-t">' +
+            '<div>💼 <strong>LinkedIn:</strong> <a href="' + PROFILE.linkedinHref + '" target="_blank">' + PROFILE.linkedin + '</a></div>' +
+            '<div>👨🏻‍💻 <strong>GitHub:</strong> <a href="' + PROFILE.githubHref + '" target="_blank">' + PROFILE.github + '</a></div>' +
+            '<div>🌐 <strong>Portfolio:</strong> <a href="' + PROFILE.websiteHref + '" target="_blank">' + PROFILE.website + '</a></div>' +
+            '<div>📧 <strong>Email:</strong> <a href="mailto:' + PROFILE.email + '">' + PROFILE.email + '</a></div>' +
+            '<div>📱 <strong>Phone:</strong> <a href="' + PROFILE.phoneHref + '">' + PROFILE.phone + '</a></div>' +
+            '</div>'
+          ) + '</div>';
+      }
+    },
+    weather: {
+      description: "Show local weather forecast",
+      output: function () {
+        return '<div><div class="h-title sm">⛅ Local Weather — Gopalpur on Sea, Odisha</div>' +
+          panel(
+            '<div class="between mb"><span class="green bold">Bay of Bengal Coastal Region</span><span class="yellow">19.26° N, 84.86° E</span></div>' +
+            '<div class="grid three g3 center mb">' +
+            panel('<div class="big">28°C</div><div class="muted xs-t">Pleasant &amp; Breezy</div>') +
+            panel('<div class="big">68%</div><div class="muted xs-t">Humidity</div>') +
+            panel('<div class="big">14 km/h</div><div class="muted xs-t">Sea Breeze</div>') +
+            '</div>' +
+            '<div class="muted xs-t">Great weather for coding and building world-class web applications! 🚀</div>'
+          ) + '</div>';
+      }
+    },
+    echo: {
+      description: "Print arguments to terminal",
+      output: function (text) { return esc(text || ""); }
+    },
+    whoami: { description: "Display current user", output: "bikash-krishna-panga (Full-Stack Web Developer)" },
+    pwd: { description: "Print working directory", output: "/home/bikash/portfolio" },
+    date: {
+      description: "Show current date and time",
+      output: function () {
+        return "🕒 " + new Date().toString();
+      }
+    },
+    sudo: {
+      description: "Privilege escalation easter egg",
+      output: function (cmd) {
+        return '<div><div class="yellow bold">[sudo] password for visitor: *********</div>' +
+          '<div class="green mt">✓ Access granted: You are authorized to contact and hire Bikash Krishna Panga! 🚀</div>' +
+          '<div class="muted sm-t mt">Type <span class="cmd-pill" onclick="runCmd(\'contact\')">contact</span> or <span class="cmd-pill" onclick="runCmd(\'resume\')">resume</span> to proceed.</div></div>';
+      }
+    },
+    matrix: {
+      description: "Matrix digital rain easter egg",
+      output: function () {
+        setTheme("matrix");
+        return '<div><div class="green bold lg-t" style="letter-spacing:2px">01000010 01001001 01001011 01000001 01010011 01001000</div>' +
+          '<div class="green sm-t">"Wake up, Neo... The Matrix has you. Follow the white rabbit." 🐇</div>' +
+          '<div class="muted xs-t mt">Matrix green theme enabled! Type <span class="cmd-pill" onclick="runCmd(\'theme default\')">theme default</span> to revert.</div></div>';
+      }
+    },
+    exit: {
+      description: "Exit terminal session",
+      output: function () {
+        return '<div><div class="green bold lg-t mb">👋 Session Ended</div>' +
+          '<div class="gray mb">Thank you for visiting Bikash Krishna Panga\'s interactive portfolio!</div>' +
+          '<div class="muted sm-t">Type any command (like <span class="green">\'help\'</span> or <span class="green">\'neofetch\'</span>) to start a new session.</div></div>';
+      }
+    },
+    clear: { description: "Clear the terminal screen", output: "clear" }
+  };
+
+  // Direct aliases for commands
+  commands.cls = commands.clear;
+  commands.dir = commands.ls;
+  commands.ll = { description: "Long format file listing", output: function () { return commands.ls.output("-l"); } };
+  commands.mail = commands.contact;
+  commands.email = commands.contact;
+  commands.github = { description: "Open GitHub profile", output: function () { return commands.open.output("github"); } };
+  commands.linkedin = { description: "Open LinkedIn profile", output: function () { return commands.open.output("linkedin"); } };
+  commands.website = { description: "Open portfolio website", output: function () { return commands.open.output("website"); } };
+  commands.download = { description: "Download resume", output: function () { return commands.resume.output(); } };
+  commands.view = commands.cat;
+  commands.more = commands.cat;
+  commands.less = commands.cat;
+  commands.head = commands.cat;
+  commands.tail = commands.cat;
+  commands.nano = commands.cat;
+  commands.vim = commands.cat;
+
+  var names = Object.keys(commands);
+  var sessionStart = Date.now();
+
+  /* ------------------------------------------------------------------ */
+  /*  Terminal engine                                                   */
+  /* ------------------------------------------------------------------ */
+  var historyEl = document.getElementById("history");
+  var terminal = document.getElementById("terminal");
+  var input = document.getElementById("cmd");
+  var suggestEl = document.getElementById("suggest");
+  var busyEl = document.getElementById("busy");
+  var clockEl = document.getElementById("clock");
+
+  var commandHistory = ["neofetch"];
+  var historyIndex = -1;
+  var isLoading = false;
+
+  document.getElementById("cmdcount").textContent = "📦 " + names.length + " commands available";
+  setTheme("default");
+
+  function tick() {
+    if (clockEl) clockEl.textContent = new Date().toLocaleTimeString();
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  function scrollDown() {
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  function wirePhotoFallback(root) {
+    var imgs = root.querySelectorAll("img[data-nf-photo]");
+    imgs.forEach(function (img) {
+      function replaceWithFallback() {
+        if (img.dataset.hasFallback) return;
+        img.dataset.hasFallback = "1";
+        var d = document.createElement("div");
+        d.className = "nf-fallback";
+        d.setAttribute("role", "img");
+        d.setAttribute("aria-label", PROFILE.name);
+        d.textContent = "BKP";
+        img.replaceWith(d);
+      }
+      if (img.complete && img.naturalWidth === 0) {
+        replaceWithFallback();
+      } else {
+        img.addEventListener("error", replaceWithFallback);
+      }
+    });
+  }
+
+  function addEntry(command, output, isHtml) {
+    var entry = document.createElement("div");
+    entry.className = "entry";
+    if (command) {
+      var line = document.createElement("div");
+      line.className = "cmdline";
+      line.innerHTML = '<span class="prompt">bikash@portfolio:~$</span><span class="cmdtext"></span><span class="stamp">' +
+        new Date().toLocaleTimeString() + "</span>";
+      line.querySelector(".cmdtext").textContent = command;
+      entry.appendChild(line);
+    }
+    var out = document.createElement("div");
+    out.className = "out" + (isHtml ? "" : " plain");
+    if (isHtml) out.innerHTML = output; else out.textContent = output;
+    entry.appendChild(out);
+    historyEl.appendChild(entry);
+    wirePhotoFallback(entry);
+    scrollDown();
+  }
+
+  function setLoading(v) {
+    isLoading = v;
+    if (busyEl) busyEl.hidden = !v;
+    input.placeholder = v ? "Processing command..." : "Type 'help' or click any command...";
+  }
+
+  // Global helper for clickable commands and files
+  window.runCmd = function (cmdStr) {
+    input.value = "";
+    runCommand(cmdStr);
+  };
+
+  window.copyToClipboard = function (text, btn) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        if (btn) {
+          var orig = btn.textContent;
+          btn.textContent = "✓ Copied!";
+          setTimeout(function () { btn.textContent = orig; }, 2000);
+        }
+      });
+    }
+  };
+
+  /* ------------------------------------------------------------------ */
+  /*  Command Execution & Dispatcher                                    */
+  /* ------------------------------------------------------------------ */
+  function runCommand(raw) {
+    var trimmed = raw.trim();
+    if (!trimmed) return;
+
+    commandHistory.push(trimmed);
+    historyIndex = -1;
+
+    var parts = trimmed.split(/\s+/);
+    var firstWord = parts[0].toLowerCase();
+    var restArgs = trimmed.slice(parts[0].length).trim();
+    var cleanFirst = firstWord.replace(/^\.\//, "");
+
+    // Direct filename invocation (e.g. typing "resume.pdf" or "about.txt" directly)
+    if (VFS[cleanFirst] && !commands[cleanFirst]) {
+      setLoading(true);
+      setTimeout(function () {
+        addEntry(raw, VFS[cleanFirst].view(), true);
+        setLoading(false);
+      }, 40);
+      return;
+    }
+
+    if (cleanFirst === "clear" || cleanFirst === "cls") {
+      historyEl.innerHTML = "";
+      return;
+    }
+
+    setLoading(true);
+    setTimeout(function () {
+      var c = commands[cleanFirst];
+      if (c) {
+        var out;
+        if (typeof c.output === "function") {
+          out = c.output(restArgs);
+        } else {
+          out = c.output;
+        }
+        addEntry(raw, out, typeof out === "string" && out.indexOf("<") !== -1);
+      } else {
+        // Check suggestions across commands and files
+        var allTerms = names.concat(Object.keys(VFS));
+        var sugg = allTerms.filter(function (n) {
+          return n.indexOf(cleanFirst) !== -1 || cleanFirst.indexOf(n) !== -1;
+        }).slice(0, 4);
+
+        var html = '<div><div class="red" style="margin-bottom:8px">❌ Command not found: <span class="bold">' + esc(trimmed) + "</span></div>" +
+          (sugg.length ? '<div class="muted">💡 Did you mean: ' + sugg.map(function (s) {
+            return '<span class="cmd-pill" onclick="runCmd(\'' + esc(s) + '\')">' + esc(s) + "</span>";
+          }).join(" ") + "</div>" : "") +
+          '<div class="muted" style="margin-top:6px">Type <span class="cmd-pill" onclick="runCmd(\'help\')">help</span> to view all commands or <span class="cmd-pill" onclick="runCmd(\'ls\')">ls</span> to browse files.</div></div>';
+        addEntry(raw, html, true);
+      }
+      setLoading(false);
+    }, 40);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Interactive Suggestions                                           */
+  /* ------------------------------------------------------------------ */
+  function renderSuggestions() {
+    var v = input.value.trim().toLowerCase();
+    if (!v) { suggestEl.innerHTML = ""; return; }
+
+    var matches = [];
+    if (v.indexOf("cat ") === 0 || v.indexOf("open ") === 0 || v.indexOf("view ") === 0) {
+      var prefix = v.split(/\s+/)[0] + " ";
+      var arg = v.slice(prefix.length).trim();
+      var fKeys = Object.keys(VFS).filter(function (k) { return k !== "Bikash_Krishna_Panga_Resume_Revised.pdf"; });
+      matches = fKeys
+        .filter(function (f) { return !arg || f.indexOf(arg) === 0; })
+        .slice(0, 6)
+        .map(function (f) {
+          return '<span class="s-chip" onclick="runCmd(\'' + prefix + f + '\')"><span class="s-name">' + prefix + f + '</span><span class="s-desc">(' + VFS[f].size + ')</span></span>';
+        });
+    } else {
+      matches = names
+        .filter(function (n) { return n.indexOf(v) === 0; })
+        .slice(0, 6)
+        .map(function (n) {
+          return '<span class="s-chip" onclick="runCmd(\'' + n + '\')"><span class="s-name">' + n + '</span><span class="s-desc">- ' + commands[n].description + '</span></span>';
+        });
+    }
+
+    suggestEl.innerHTML = matches.join("");
+  }
+
+  input.addEventListener("input", renderSuggestions);
+
+  /* ------------------------------------------------------------------ */
+  /*  Keyboard Navigation & Autocomplete                                */
+  /* ------------------------------------------------------------------ */
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      var v = input.value;
+      input.value = "";
+      renderSuggestions();
+      runCommand(v);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (commandHistory.length) {
+        historyIndex = historyIndex === -1 ? commandHistory.length - 1 : Math.max(0, historyIndex - 1);
+        input.value = commandHistory[historyIndex];
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (historyIndex !== -1) {
+        historyIndex++;
+        if (historyIndex >= commandHistory.length) {
+          historyIndex = -1;
+          input.value = "";
+        } else {
+          input.value = commandHistory[historyIndex];
+        }
+      }
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      var cur = input.value.trim().toLowerCase();
+      if (!cur) return;
+
+      if (cur.indexOf("cat ") === 0 || cur.indexOf("open ") === 0 || cur.indexOf("view ") === 0) {
+        var pfx = cur.split(/\s+/)[0] + " ";
+        var filePart = cur.slice(pfx.length).trim();
+        var fNames = Object.keys(VFS).filter(function (k) { return k !== "Bikash_Krishna_Panga_Resume_Revised.pdf"; });
+        var fileMatches = fNames.filter(function (f) { return f.indexOf(filePart) === 0; });
+        if (fileMatches.length === 1) {
+          input.value = pfx + fileMatches[0];
+        } else if (fileMatches.length > 1) {
+          addEntry(input.value + " <TAB>",
+            '<div><div class="yellow bold mb">Matching files:</div><div class="chips">' +
+            fileMatches.map(function (m) { return '<span class="cmd-pill" onclick="runCmd(\'' + pfx + m + '\')">' + m + '</span>'; }).join(" ") +
+            '</div></div>', true);
+        }
+      } else {
+        var cmdMatches = names.filter(function (n) { return n.indexOf(cur) === 0; });
+        if (cmdMatches.length === 1) {
+          input.value = cmdMatches[0];
+        } else if (cmdMatches.length > 1) {
+          addEntry(input.value + " <TAB>",
+            '<div><div class="yellow bold mb">Matching commands:</div><div class="chips">' +
+            cmdMatches.map(function (m) { return '<span class="cmd-pill" onclick="runCmd(\'' + m + '\')">' + m + '</span>'; }).join(" ") +
+            '</div></div>', true);
+        }
+      }
+      renderSuggestions();
+    } else if (e.key === "Escape") {
+      input.value = "";
+      historyIndex = -1;
+      renderSuggestions();
+    } else if (e.ctrlKey && (e.key === "l" || e.key === "L")) {
+      e.preventDefault();
+      historyEl.innerHTML = "";
+    } else if (e.ctrlKey && (e.key === "c" || e.key === "C")) {
+      e.preventDefault();
+      addEntry(input.value + "^C", "", false);
+      input.value = "";
+      historyIndex = -1;
+      renderSuggestions();
+    }
+  });
+
+  // Re-focus input on terminal click (unless user is selecting text or clicking a link/button)
+  terminal.addEventListener("click", function (e) {
+    if (e.target.closest("a, button, .cmd-pill, .s-chip, .file-card")) return;
+    if (window.getSelection && String(window.getSelection())) return;
+    input.focus();
+  });
+
+  // Topbar Window Controls
+  var btnClose = document.getElementById("btn-close");
+  var btnMin = document.getElementById("btn-minimize");
+  var btnFull = document.getElementById("btn-fullscreen");
+
+  if (btnClose) {
+    btnClose.addEventListener("click", function () {
+      historyEl.innerHTML = "";
+      bootWelcome();
+    });
+  }
+  if (btnMin) {
+    btnMin.addEventListener("click", function () {
+      historyEl.innerHTML = "";
+    });
+  }
+  if (btnFull) {
+    btnFull.addEventListener("click", function () {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(function () {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Boot sequence                                                     */
+  /* ------------------------------------------------------------------ */
+  function bootWelcome() {
+    addEntry("",
+      '<div><div class="green bold lg-t" style="margin-bottom:8px">🎉 Welcome to Bikash Krishna Panga\'s Interactive Portfolio Terminal!</div>' +
+      '<div class="gray mb">Explore my full-stack development experience, live projects, skills, and resume using an authentic command-line shell.</div>' +
+      '<div class="notice mb">' +
+      '<div class="blue bold" style="margin-bottom:6px">🚀 Quick Navigation (Click any button or type):</div>' +
+      '<div class="chips mb" style="margin-top:6px">' +
+      '<span class="cmd-pill" onclick="runCmd(\'about\')">about</span>' +
+      '<span class="cmd-pill" onclick="runCmd(\'skills\')">skills</span>' +
+      '<span class="cmd-pill" onclick="runCmd(\'experience\')">experience</span>' +
+      '<span class="cmd-pill" onclick="runCmd(\'projects\')">projects</span>' +
+      '<span class="cmd-pill" onclick="runCmd(\'ls\')">ls (files)</span>' +
+      '<span class="cmd-pill" onclick="runCmd(\'resume\')">resume (PDF)</span>' +
+      '<span class="cmd-pill" onclick="runCmd(\'contact\')">contact</span>' +
+      '<span class="cmd-pill" onclick="runCmd(\'theme\')">theme</span>' +
+      '<span class="cmd-pill" onclick="runCmd(\'help\')">help</span>' +
+      '</div>' +
+      '<div class="sm-t muted">• Use <span class="yellow">↑ / ↓</span> for history, <span class="yellow">Tab</span> for autocomplete, click any file card to view.</div>' +
+      '</div></div>', true);
+
+    addEntry("neofetch", neofetch(), true);
+  }
+
+  bootWelcome();
+  input.focus();
+})();
+</script>
+</body>
+</html>

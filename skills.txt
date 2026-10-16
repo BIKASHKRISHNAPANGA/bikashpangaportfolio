@@ -1,0 +1,54 @@
+================================================================================
+BIKASH KRISHNA PANGA — TECHNICAL SKILLS
+================================================================================
+
+💬 PROGRAMMING LANGUAGES:
+   - JavaScript (ES6+)
+   - TypeScript
+   - HTML5 & Semantic Web
+   - CSS3 & Modern Styling
+
+🎨 FRONTEND DEVELOPMENT:
+   - React.js (v18, v19)
+   - Next.js (SSR, SSG, App Router)
+   - Tailwind CSS
+   - Responsive & Mobile-First Design
+   - Web Accessibility & SEO
+
+📱 MOBILE DEVELOPMENT:
+   - React Native (Cross-Platform Mobile Apps)
+
+⚙️ BACKEND & APIS:
+   - Node.js
+   - Express.js
+   - RESTful API Architecture & Integration
+   - CRUD Operations & Middleware Design
+
+📚 LIBRARIES & STATE MANAGEMENT:
+   - Tiptap.js (Headless Rich-Text Editor Framework)
+   - Redux Toolkit & React Context API
+   - Axios & Fetch API
+   - Framer Motion
+
+🗄️ DATABASES & CMS:
+   - MongoDB (Mongoose ODM)
+   - Firebase (Authentication, Firestore, Hosting)
+   - WordPress (Custom Themes, Plugins, PHP & Headless CMS)
+
+🛠️ TOOLS & PLATFORMS:
+   - Git & GitHub (Branching, PRs, Version Control)
+   - Vercel & Netlify (CI/CD Deployment)
+   - Postman (API Testing & Debugging)
+   - Vite & Webpack Build Tools
+
+🧠 CORE COMPUTER SCIENCE CONCEPTS:
+   - Data Structures & Algorithms
+   - Frontend Performance Optimization
+   - SEO Optimization
+   - Cross-Browser Compatibility
+   - Agile & Scrum Methodology
+
+🤖 AI-ASSISTED DEVELOPMENT:
+   - Prompt engineering with Claude, ChatGPT, GitHub Copilot, Gemini
+   - Accelerated debugging, code generation, and test-case authoring
+================================================================================
